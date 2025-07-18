@@ -60,8 +60,9 @@ def generate_html(correct, wrong):
                      .replace("{{WRONG}}", str(wrong)) \
                      .replace("{{PERCENT}}", str(success))
 
-    with open("index.html", "w") as f:
-        f.write(output)
+    with open("index.html", "w", encoding="utf-8") as f:
+    f.write(html_content)
+
 
 if __name__ == "__main__":
     db_id = get_database_id()
