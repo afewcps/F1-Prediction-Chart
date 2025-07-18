@@ -1,0 +1,38 @@
+# .github/workflows/generate.yml
+
+name: Generate Prediction Chart Daily
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # täglich um 06:00 UTC (08:00 Uhr in Deutschland)
+  workflow_dispatch:     # erlaubt manuelles Ausführen
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run chart generation
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_URL: ${{ secrets.NOTION_DATABASE_URL }}
+        run: python generate_chart.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Update chart [auto]" || echo "No changes to commit"
+          git push
