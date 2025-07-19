@@ -24,8 +24,11 @@ jobs:
           pip install -r requirements.txt
 
 
-      - name: Run Chart Generator
+      - name: Run chart generator
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
         run: python generate_chart.py
+
 
       - name: Commit and Push
         run: |
