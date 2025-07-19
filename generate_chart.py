@@ -61,7 +61,7 @@ def generate_html(correct, wrong):
                      .replace("{{PERCENT}}", str(success))
 
     with open("index.html", "w", encoding="utf-8") as f:
-    f.write(html_content)
+        f.write(html_content)
 
 
 if __name__ == "__main__":
