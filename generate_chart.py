@@ -61,7 +61,7 @@ def generate_html(correct, wrong):
     """
 
     # Schreibe die HTML-Datei (in docs/index.html oder index.html)
-    with open("docs/index.html", "w", encoding="utf-8") as f:
+    with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
 
 if __name__ == "__main__":
