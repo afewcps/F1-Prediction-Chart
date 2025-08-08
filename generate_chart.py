@@ -1,110 +1,123 @@
-import os
 import requests
+import math
+import json
 
-# Notion API Token und Datenbank-ID aus Umgebungsvariablen lesen
-NOTION_TOKEN = os.environ["NOTION_TOKEN"]
-NOTION_DATABASE_ID = os.environ["NOTION_DATABASE_ID"]
-
+# Notion API Config
+NOTION_TOKEN = "NOTION_TOKEN"
+DATABASE_ID = "1e26839379ed802a9f96f7875c65dc6d"
 HEADERS = {
     "Authorization": f"Bearer {NOTION_TOKEN}",
-    "Notion-Version": "2022-06-28",
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
+    "Notion-Version": "2022-06-28"
 }
 
-def query_notion_database():
-    url = f"https://api.notion.com/v1/databases/{NOTION_DATABASE_ID}/query"
-    data = {}  # keine Filter, alle Einträge
+# Schritt 1: Datenbank-Einträge aus Notion abrufen
+def get_notion_predictions():
+    url = f"https://api.notion.com/v1/databases/{DATABASE_ID}/query"
+    predictions = []
+    has_more = True
+    next_cursor = None
 
-    response = requests.post(url, headers=HEADERS, json=data)
-    response.raise_for_status()
-    results = response.json()["results"]
-    return results
+    while has_more:
+        payload = {}
+        if next_cursor:
+            payload["start_cursor"] = next_cursor
 
-def count_predictions(results):
-    correct = 0
-    wrong = 0
-    for page in results:
-        props = page["properties"]
-        # Annahme: Die Eigenschaft heißt "Prediction" und ist vom Typ number
-        prediction_value = props.get("Prediction", {}).get("number")
-        if prediction_value is None:
-            continue
+        res = requests.post(url, headers=HEADERS, json=payload)
+        data = res.json()
 
-        # Annahme: prediction_value ist Anzahl der richtigen Predictions
-        # Beispiel: richtig = prediction_value, falsch = (3 - prediction_value) wenn max 3 Predictions pro Rennen
-        correct += prediction_value
-        wrong += (3 - prediction_value)  # Anpassen, falls anders
+        for page in data.get("results", []):
+            prediction_val = page["properties"]["Prediction"].get("number")
+            if prediction_val is not None:  # nur gefahrene Rennen zählen
+                predictions.append(prediction_val)
 
-    return correct, wrong
+        has_more = data.get("has_more", False)
+        next_cursor = data.get("next_cursor")
 
-def generate_html(correct, wrong):
-    total = correct + wrong
-    percent_correct = (correct / total) * 100 if total > 0 else 0
+    return predictions
+
+# Schritt 2: Accuracy berechnen
+def calculate_accuracy(predictions):
+    if not predictions:
+        return 0
+    sum_predictions = sum(predictions)
+    count_races = len(predictions)
+    accuracy = sum_predictions / (3 * count_races)
+    return accuracy
+
+# Schritt 3: HTML mit Chart.js generieren
+def generate_html(accuracy):
+    percent = round(accuracy * 100, 1)
+    color = "#ffffff"  # Weißer Ring
+    text_color = "#ffffff"
 
     html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Prediction Chart</title>
-      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-      <style>
-        body {{
-          background: transparent;
-          margin: 0;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Prediction Accuracy</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    html, body {{
+      margin: 0;
+      padding: 0;
+      background: transparent;
+    }}
+    canvas {{
+      display: block;
+    }}
+  </style>
+</head>
+<body>
+  <canvas id="accuracyChart" width="300" height="300"></canvas>
+
+  <script>
+    const ctx = document.getElementById('accuracyChart').getContext('2d');
+
+    const accuracy = {percent};
+
+    const chart = new Chart(ctx, {{
+      type: 'doughnut',
+      data: {{
+        datasets: [{{
+          data: [accuracy, 100 - accuracy],
+          backgroundColor: ['{color}', 'rgba(255,255,255,0.1)'],
+          borderWidth: 0
+        }}]
+      }},
+      options: {{
+        cutout: '80%',
+        responsive: true,
+        animation: false,
+        plugins: {{
+          tooltip: {{ enabled: false }},
+          legend: {{ display: false }}
         }}
-        canvas {{
-          max-width: 300px;
-          max-height: 300px;
+      }},
+      plugins: [{{
+        id: 'centerText',
+        beforeDraw: (chart) => {{
+          const {{ ctx, chartArea: {{ width, height }} }} = chart;
+          ctx.save();
+          ctx.font = 'bold 32px Arial';
+          ctx.fillStyle = '{text_color}';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(accuracy + '%', width / 2, height / 2);
         }}
-      </style>
-    </head>
-    <body>
-      <canvas id="myChart"></canvas>
-      <script>
-        const data = {{
-          labels: ['Correct', 'Wrong'],
-          datasets: [{{
-            data: [{correct}, {wrong}],
-            backgroundColor: ['#4CAF50', '#F44336'],
-            borderWidth: 1
-          }}]
-        }};
-
-        const config = {{
-          type: 'doughnut',
-          data: data,
-          options: {{
-            responsive: true,
-            plugins: {{
-              legend: {{
-                position: 'bottom',
-              }},
-              tooltip: {{
-                enabled: true
-              }}
-            }}
-          }}
-        }};
-
-        new Chart(
-          document.getElementById('myChart'),
-          config
-        );
-      </script>
-    </body>
-    </html>
-    """
-
-    with open("index.html", "w", encoding="utf-8") as f:
+      }}]
+    }});
+  </script>
+</body>
+</html>
+"""
+    with open("accuracy_chart.html", "w", encoding="utf-8") as f:
         f.write(html_content)
 
+# Hauptlogik
 if __name__ == "__main__":
-    results = query_notion_database()
-    correct_predictions, wrong_predictions = count_predictions(results)
-    print(f"Correct: {correct_predictions}, Wrong: {wrong_predictions}")
-
-    generate_html(correct_predictions, wrong_predictions)
+    predictions = get_notion_predictions()
+    accuracy = calculate_accuracy(predictions)
+    generate_html(accuracy)
+    print(f"✅ Prediction Accuracy Chart erstellt ({round(accuracy*100, 1)}%) → accuracy_chart.html")
