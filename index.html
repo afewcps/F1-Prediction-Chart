@@ -6,27 +6,37 @@
   <title>Prediction Accuracy</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
-      background: transparent;
+      background-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    }
+    #chartContainer {
+      width: 300px;
+      height: 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     canvas {
-      display: block;
+      background-color: transparent;
     }
   </style>
 </head>
 <body>
-  <canvas id="accuracyChart" width="300" height="300"></canvas>
-
+  <div id="chartContainer">
+    <canvas id="accuracyChart"></canvas>
+  </div>
   <script>
+    const accuracy = 0;
+    const correctPredictions = 0;
+    const incorrectPredictions = 0;
     const ctx = document.getElementById('accuracyChart').getContext('2d');
 
-    const accuracy = 53.8;
-
-    const chart = new Chart(ctx, {
+    new Chart(ctx, {
       type: 'doughnut',
       data: {
+        labels: ['Richtig', 'Falsch'],
         datasets: [{
           data: [accuracy, 100 - accuracy],
           backgroundColor: ['#ffffff', 'rgba(255,255,255,0.1)'],
@@ -34,11 +44,21 @@
         }]
       },
       options: {
-        cutout: '80%',
-        responsive: true,
-        animation: false,
+        cutout: '75%',
+        responsive: false,
         plugins: {
-          tooltip: { enabled: false },
+          tooltip: { 
+            enabled: true,
+            callbacks: {
+              label: function(context) {
+                if (context.dataIndex === 0) {
+                  return 'Richtige Predictions: ' + correctPredictions;
+                } else {
+                  return 'Falsche Predictions: ' + incorrectPredictions;
+                }
+              }
+            }
+          },
           legend: { display: false }
         }
       },
@@ -47,15 +67,23 @@
         beforeDraw: (chart) => {
           const { ctx, chartArea: { width, height } } = chart;
           ctx.save();
-          ctx.font = 'bold 32px Arial';
+          
+          // "Predictions" Label
+          ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
           ctx.fillStyle = '#ffffff';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText(accuracy + '%', width / 2, height / 2);
+          ctx.fillText('Predictions', width / 2, height / 2 - 20);
+          
+          // Percentage
+          ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
+          ctx.fillStyle = '#ffffff';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(accuracy + '%', width / 2, height / 2 + 10);
         }
       }]
     });
   </script>
 </body>
 </html>
-
