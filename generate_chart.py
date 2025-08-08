@@ -148,5 +148,9 @@ def generate_html(accuracy, correct_count, incorrect_count):
 if __name__ == "__main__":
     predictions = get_notion_predictions()
     accuracy = calculate_accuracy(predictions)
-    generate_html(accuracy)
-    print(f"✅ Prediction Accuracy Chart erstellt ({round(accuracy*100, 1)}%) → accuracy_chart.html")
+
+    correct_count = int(sum(predictions))
+    incorrect_count = int(len(predictions) * 3 - correct_count)
+
+    generate_html(accuracy, correct_count, incorrect_count)
+    print(f"✅ Prediction Accuracy Chart erstellt ({round(accuracy*100, 1)}%) → index.html")
