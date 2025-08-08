@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Prediction Accuracy</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="accuracyChart" width="300" height="300"></canvas>
+
+  <script>
+    const ctx = document.getElementById('accuracyChart').getContext('2d');
+
+    const accuracy = 53.8;
+
+    const chart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: [accuracy, 100 - accuracy],
+          backgroundColor: ['#ffffff', 'rgba(255,255,255,0.1)'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        cutout: '80%',
+        responsive: true,
+        animation: false,
+        plugins: {
+          tooltip: { enabled: false },
+          legend: { display: false }
+        }
+      },
+      plugins: [{
+        id: 'centerText',
+        beforeDraw: (chart) => {
+          const { ctx, chartArea: { width, height } } = chart;
+          ctx.save();
+          ctx.font = 'bold 32px Arial';
+          ctx.fillStyle = '#ffffff';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(accuracy + '%', width / 2, height / 2);
+        }
+      }]
+    });
+  </script>
+</body>
+</html>
