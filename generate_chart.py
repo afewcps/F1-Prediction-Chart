@@ -121,6 +121,9 @@ def generate_html(accuracy):
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
 
+print(json.dumps(page["properties"], indent=2))
+
+
 # Hauptlogik
 if __name__ == "__main__":
     predictions = get_notion_predictions()
