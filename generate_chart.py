@@ -48,8 +48,8 @@ def calculate_accuracy(predictions):
 # Schritt 3: HTML mit Chart.js generieren
 def generate_html(accuracy, predictions):
     percent = round(accuracy * 100, 1)
-    total_possible = len(predictions) * 3
     correct_predictions = sum(predictions)
+    total_possible = len(predictions) * 3
     incorrect_predictions = total_possible - correct_predictions
     
     ring_color = "#ffffff"
@@ -154,4 +154,4 @@ if __name__ == "__main__":
     predictions = get_notion_predictions()
     accuracy = calculate_accuracy(predictions)
     generate_html(accuracy, predictions)
-    print(f"✅ Prediction Accuracy Chart erstellt ({round(accuracy*100, 1)}%) → accuracy_chart.html")
+    print(f"✅ Prediction Accuracy Chart erstellt ({round(accuracy*100, 1)}%) → index.html")
