@@ -118,7 +118,7 @@ def generate_html(accuracy):
 </body>
 </html>
 """
-    with open("accuracy_chart.html", "w", encoding="utf-8") as f:
+    with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
 
 # Hauptlogik
