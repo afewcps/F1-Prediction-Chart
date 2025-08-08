@@ -29,7 +29,7 @@ def get_notion_predictions():
 
         for page in data.get("results", []):
             
-            print(json.dumps(page["properties"], indent=2))
+           # print(json.dumps(page["properties"], indent=2))
 
             prediction_val = page["properties"]["Prediction"].get("number")
             if prediction_val is not None:  # nur gefahrene Rennen zählen
