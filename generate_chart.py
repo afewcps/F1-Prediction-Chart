@@ -27,6 +27,9 @@ def get_notion_predictions():
         data = res.json()
 
         for page in data.get("results", []):
+            
+            print(json.dumps(page["properties"], indent=2))
+
             prediction_val = page["properties"]["Prediction"].get("number")
             if prediction_val is not None:  # nur gefahrene Rennen zählen
                 predictions.append(prediction_val)
@@ -120,8 +123,6 @@ def generate_html(accuracy):
 """
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
-
-print(json.dumps(page["properties"], indent=2))
 
 
 # Hauptlogik
