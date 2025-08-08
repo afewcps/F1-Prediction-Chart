@@ -48,7 +48,8 @@ def calculate_accuracy(predictions):
 # Schritt 3: HTML mit Chart.js generieren
 def generate_html(accuracy):
     percent = round(accuracy * 100, 1)
-    color = "#ffffff"  # Weißer Ring
+    ring_color = "#ffffff"
+    background_ring = "rgba(255,255,255,0.1)"
     text_color = "#ffffff"
 
     html_content = f"""
@@ -59,37 +60,42 @@ def generate_html(accuracy):
   <title>Prediction Accuracy</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    html, body {{
+    body {{
       margin: 0;
-      padding: 0;
-      background: transparent;
+      background-color: transparent;
+    }}
+    #chartContainer {{
+      width: 300px;
+      height: 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }}
     canvas {{
-      display: block;
+      background-color: transparent;
     }}
   </style>
 </head>
 <body>
-  <canvas id="accuracyChart" width="300" height="300"></canvas>
-
+  <div id="chartContainer">
+    <canvas id="accuracyChart"></canvas>
+  </div>
   <script>
+    const accuracy = {percent};
     const ctx = document.getElementById('accuracyChart').getContext('2d');
 
-    const accuracy = {percent};
-
-    const chart = new Chart(ctx, {{
+    new Chart(ctx, {{
       type: 'doughnut',
       data: {{
         datasets: [{{
           data: [accuracy, 100 - accuracy],
-          backgroundColor: ['{color}', 'rgba(255,255,255,0.1)'],
+          backgroundColor: ['{ring_color}', '{background_ring}'],
           borderWidth: 0
         }}]
       }},
       options: {{
-        cutout: '80%',
-        responsive: true,
-        animation: false,
+        cutout: '75%',
+        responsive: false,
         plugins: {{
           tooltip: {{ enabled: false }},
           legend: {{ display: false }}
