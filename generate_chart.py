@@ -1,9 +1,10 @@
 import requests
 import math
 import json
+import os
 
 # Notion API Config
-NOTION_TOKEN = "NOTION_TOKEN"
+NOTION_TOKEN = os.environ["NOTION_TOKEN"]
 DATABASE_ID = "1e26839379ed802a9f96f7875c65dc6d"
 HEADERS = {
     "Authorization": f"Bearer {NOTION_TOKEN}",
