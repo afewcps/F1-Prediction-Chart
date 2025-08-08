@@ -9,7 +9,6 @@
     body {
       margin: 0;
       background-color: transparent;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
     }
     #chartContainer {
       width: 300px;
@@ -29,14 +28,11 @@
   </div>
   <script>
     const accuracy = 0;
-    const correctPredictions = 0;
-    const incorrectPredictions = 0;
     const ctx = document.getElementById('accuracyChart').getContext('2d');
 
     new Chart(ctx, {
       type: 'doughnut',
       data: {
-        labels: ['Richtig', 'Falsch'],
         datasets: [{
           data: [accuracy, 100 - accuracy],
           backgroundColor: ['#ffffff', 'rgba(255,255,255,0.1)'],
@@ -47,18 +43,7 @@
         cutout: '75%',
         responsive: false,
         plugins: {
-          tooltip: { 
-            enabled: true,
-            callbacks: {
-              label: function(context) {
-                if (context.dataIndex === 0) {
-                  return 'Richtige Predictions: ' + correctPredictions;
-                } else {
-                  return 'Falsche Predictions: ' + incorrectPredictions;
-                }
-              }
-            }
-          },
+          tooltip: { enabled: false },
           legend: { display: false }
         }
       },
@@ -67,20 +52,11 @@
         beforeDraw: (chart) => {
           const { ctx, chartArea: { width, height } } = chart;
           ctx.save();
-          
-          // "Predictions" Label
-          ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
+          ctx.font = 'bold 32px Arial';
           ctx.fillStyle = '#ffffff';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText('Predictions', width / 2, height / 2 - 20);
-          
-          // Percentage
-          ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
-          ctx.fillStyle = '#ffffff';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(accuracy + '%', width / 2, height / 2 + 10);
+          ctx.fillText(accuracy + '%', width / 2, height / 2);
         }
       }]
     });
