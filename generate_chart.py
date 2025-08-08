@@ -50,7 +50,7 @@ def calculate_accuracy(predictions):
     return accuracy
 
 # Schritt 3: HTML mit Chart.js generieren
-def generate_html(accuracy):
+def generate_html(accuracy, correct_count, incorrect_count):
     percent = round(accuracy * 100, 1)
     ring_color = "#ffffff"
     background_ring = "rgba(255,255,255,0.1)"
@@ -86,13 +86,16 @@ def generate_html(accuracy):
   </div>
   <script>
     const accuracy = {percent};
+    const correct = {correct_count};
+    const incorrect = {incorrect_count};
     const ctx = document.getElementById('accuracyChart').getContext('2d');
 
     new Chart(ctx, {{
       type: 'doughnut',
       data: {{
+        labels: ['Correct', 'Incorrect'],
         datasets: [{{
-          data: [accuracy, 100 - accuracy],
+          data: [correct, incorrect],
           backgroundColor: ['{ring_color}', '{background_ring}'],
           borderWidth: 0
         }}]
@@ -101,8 +104,17 @@ def generate_html(accuracy):
         cutout: '75%',
         responsive: false,
         plugins: {{
-          tooltip: {{ enabled: false }},
-          legend: {{ display: false }}
+          legend: {{ display: false }},
+          tooltip: {{
+            enabled: true,
+            callbacks: {{
+              label: function(context) {{
+                let label = context.label || '';
+                let value = context.parsed;
+                return label + ': ' + value;
+              }}
+            }}
+          }}
         }}
       }},
       plugins: [{{
@@ -110,11 +122,17 @@ def generate_html(accuracy):
         beforeDraw: (chart) => {{
           const {{ ctx, chartArea: {{ width, height }} }} = chart;
           ctx.save();
-          ctx.font = 'bold 32px Arial';
+          // "Predictions" oben
+          ctx.font = '16px Arial';
           ctx.fillStyle = '{text_color}';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText(accuracy + '%', width / 2, height / 2);
+          ctx.fillText('Predictions', width / 2, height / 2 - 20);
+
+          // Prozentzahl darunter
+          ctx.font = 'bold 32px Arial';
+          ctx.fillStyle = '{text_color}';
+          ctx.fillText(accuracy + '%', width / 2, height / 2 + 10);
         }}
       }}]
     }});
