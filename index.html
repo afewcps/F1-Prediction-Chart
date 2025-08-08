@@ -28,13 +28,16 @@
   </div>
   <script>
     const accuracy = 53.8;
+    const correct = 21;
+    const incorrect = 18;
     const ctx = document.getElementById('accuracyChart').getContext('2d');
 
     new Chart(ctx, {
       type: 'doughnut',
       data: {
+        labels: ['Correct', 'Incorrect'],
         datasets: [{
-          data: [accuracy, 100 - accuracy],
+          data: [correct, incorrect],
           backgroundColor: ['#ffffff', 'rgba(255,255,255,0.1)'],
           borderWidth: 0
         }]
@@ -43,8 +46,17 @@
         cutout: '75%',
         responsive: false,
         plugins: {
-          tooltip: { enabled: false },
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              label: function(context) {
+                let label = context.label || '';
+                let value = context.parsed;
+                return label + ': ' + value;
+              }
+            }
+          }
         }
       },
       plugins: [{
@@ -52,11 +64,17 @@
         beforeDraw: (chart) => {
           const { ctx, chartArea: { width, height } } = chart;
           ctx.save();
-          ctx.font = 'bold 32px Arial';
+          // "Predictions" oben
+          ctx.font = '16px Arial';
           ctx.fillStyle = '#ffffff';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText(accuracy + '%', width / 2, height / 2);
+          ctx.fillText('Predictions', width / 2, height / 2 - 20);
+
+          // Prozentzahl darunter
+          ctx.font = 'bold 32px Arial';
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText(accuracy + '%', width / 2, height / 2 + 10);
         }
       }]
     });
