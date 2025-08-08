@@ -46,12 +46,8 @@ def calculate_accuracy(predictions):
     return accuracy
 
 # Schritt 3: HTML mit Chart.js generieren
-def generate_html(accuracy, predictions):
+def generate_html(accuracy):
     percent = round(accuracy * 100, 1)
-    correct_predictions = sum(predictions)
-    total_possible = len(predictions) * 3
-    incorrect_predictions = total_possible - correct_predictions
-    
     ring_color = "#ffffff"
     background_ring = "rgba(255,255,255,0.1)"
     text_color = "#ffffff"
@@ -67,7 +63,6 @@ def generate_html(accuracy, predictions):
     body {{
       margin: 0;
       background-color: transparent;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
     }}
     #chartContainer {{
       width: 300px;
@@ -87,14 +82,11 @@ def generate_html(accuracy, predictions):
   </div>
   <script>
     const accuracy = {percent};
-    const correctPredictions = {correct_predictions};
-    const incorrectPredictions = {incorrect_predictions};
     const ctx = document.getElementById('accuracyChart').getContext('2d');
 
     new Chart(ctx, {{
       type: 'doughnut',
       data: {{
-        labels: ['Richtig', 'Falsch'],
         datasets: [{{
           data: [accuracy, 100 - accuracy],
           backgroundColor: ['{ring_color}', '{background_ring}'],
@@ -105,18 +97,7 @@ def generate_html(accuracy, predictions):
         cutout: '75%',
         responsive: false,
         plugins: {{
-          tooltip: {{ 
-            enabled: true,
-            callbacks: {{
-              label: function(context) {{
-                if (context.dataIndex === 0) {{
-                  return 'Richtige Predictions: ' + correctPredictions;
-                }} else {{
-                  return 'Falsche Predictions: ' + incorrectPredictions;
-                }}
-              }}
-            }}
-          }},
+          tooltip: {{ enabled: false }},
           legend: {{ display: false }}
         }}
       }},
@@ -125,20 +106,11 @@ def generate_html(accuracy, predictions):
         beforeDraw: (chart) => {{
           const {{ ctx, chartArea: {{ width, height }} }} = chart;
           ctx.save();
-          
-          // "Predictions" Label
-          ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
+          ctx.font = 'bold 32px Arial';
           ctx.fillStyle = '{text_color}';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText('Predictions', width / 2, height / 2 - 20);
-          
-          // Percentage
-          ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
-          ctx.fillStyle = '{text_color}';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(accuracy + '%', width / 2, height / 2 + 10);
+          ctx.fillText(accuracy + '%', width / 2, height / 2);
         }}
       }}]
     }});
@@ -146,12 +118,12 @@ def generate_html(accuracy, predictions):
 </body>
 </html>
 """
-    with open("index.html", "w", encoding="utf-8") as f:
+    with open("accuracy_chart.html", "w", encoding="utf-8") as f:
         f.write(html_content)
 
 # Hauptlogik
 if __name__ == "__main__":
     predictions = get_notion_predictions()
     accuracy = calculate_accuracy(predictions)
-    generate_html(accuracy, predictions)
-    print(f"✅ Prediction Accuracy Chart erstellt ({round(accuracy*100, 1)}%) → index.html")
+    generate_html(accuracy)
+    print(f"✅ Prediction Accuracy Chart erstellt ({round(accuracy*100, 1)}%) → accuracy_chart.html")
